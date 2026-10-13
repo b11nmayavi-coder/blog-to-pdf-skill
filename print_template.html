@@ -1,0 +1,288 @@
+<meta charset="utf-8">
+<title>{{TITLE}} — print preview</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+/*FONTS*/
+
+:root {
+  --wrap-bg: #eceae6;
+  --wrap-ink: #3a3a38;
+  --wrap-muted: #78766f;
+  --bar-bg: #fbfaf8;
+  --bar-border: #dcdad4;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --wrap-bg: #1b1b1a;
+    --wrap-ink: #d6d4cf;
+    --wrap-muted: #8f8d86;
+    --bar-bg: #262624;
+    --bar-border: #3b3a37;
+  }
+}
+:root[data-theme="dark"] {
+  --wrap-bg: #1b1b1a;
+  --wrap-ink: #d6d4cf;
+  --wrap-muted: #8f8d86;
+  --bar-bg: #262624;
+  --bar-border: #3b3a37;
+}
+
+body {
+  background: var(--wrap-bg);
+  color: var(--wrap-ink);
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+/* ---------- preview chrome ---------- */
+.chrome {
+  position: sticky; top: 0; z-index: 5;
+  background: var(--bar-bg);
+  border-bottom: 1px solid var(--bar-border);
+  padding: 10px 20px;
+  display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
+}
+.chrome strong { font-size: 14px; font-weight: 600; }
+.chrome span { font-size: 12px; color: var(--wrap-muted); }
+.deck {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 30px; padding: 34px 16px 60px;
+  overflow-x: auto;
+}
+
+/* ---------- the paper ---------- */
+.sheet {
+  width: 794px; height: 1122px;
+  background: #fff;
+  box-shadow: 0 2px 14px rgba(20, 18, 12, .18);
+  position: relative;
+  flex: none;
+  box-sizing: border-box;
+  padding: 60px 64px 56px;
+  overflow: hidden;
+}
+.pageno {
+  position: absolute; bottom: 22px; left: 0; right: 0;
+  text-align: center;
+  font-size: 9.5px; color: #9a9a94;
+  letter-spacing: .06em;
+}
+
+/* ---------- article typography (site light mode) ---------- */
+.doc { color: #1c1c1a; font-size: 14px; line-height: 1.6; }
+.doc > :first-child { margin-top: 0 !important; }
+
+.doc h1.title {
+  font-size: 27px; font-weight: 700; text-align: center;
+  margin: 6px 0 10px; letter-spacing: -.01em; text-wrap: balance;
+}
+.doc .meta {
+  text-align: center; color: #85837c; font-size: 11px;
+  text-transform: uppercase; letter-spacing: .08em; margin: 0 0 12px;
+}
+.doc .tags { text-align: center; margin: 0 0 6px; }
+.doc .chip {
+  display: inline-block; font-size: 8.5px; letter-spacing: .09em;
+  text-transform: uppercase; color: #6d6b64;
+  border: 1px solid #d8d6cf; border-radius: 3px;
+  padding: 2px 7px; margin: 2px 2px;
+}
+.doc .src {
+  text-align: center; color: #a09e97; font-size: 10px; margin: 0 0 8px;
+}
+
+.doc h2 {
+  font-size: 19px; font-weight: 700; letter-spacing: -.01em;
+  margin: 30px 0 10px;
+}
+.doc p { margin: 0 0 13px; }
+.doc ol, .doc ul { margin: 0 0 13px; padding-left: 26px; }
+.doc li { margin: 0 0 5px; }
+.doc hr { border: 0; border-top: 1px solid #e6e4de; margin: 24px 0; }
+.doc a { color: #b8402e; text-decoration: none; }
+.doc strong { font-weight: 600; }
+.doc code {
+  font-family: "JetBrains Mono", monospace; font-size: 12px;
+  background: #f2f1ec; border-radius: 3px; padding: 1px 5px;
+}
+.doc blockquote {
+  margin: 16px 0 16px 18px;
+  background: #f7f6f2; border-left: 3px solid #d9d7cf;
+  padding: 11px 15px; border-radius: 0 4px 4px 0;
+}
+.doc blockquote p { margin: 0; font-size: 13.2px; }
+
+.doc img { display: block; max-width: 100%; }
+.doc figure { margin: 18px auto; width: 90%; }
+.doc figure img { width: 100%; }
+.doc img.solo { width: 56%; margin: 18px auto; }
+.doc .figrow {
+  display: flex; gap: 20px; align-items: flex-start; margin: 16px 0;
+}
+.doc .figrow img { width: 46%; flex: none; }
+.doc .figside { flex: 1; min-width: 0; }
+.doc .figside p:last-child { margin-bottom: 0; }
+.doc figure.side { width: 46%; flex: none; margin: 0; }
+.doc figure.solo { width: 58%; }
+.doc figcaption {
+  font-size: 10.5px; color: #85837c; text-align: center;
+  margin-top: 6px; line-height: 1.4;
+}
+
+/* ---------- reader's companion (appended summary page) ---------- */
+.doc .crumb {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
+  color: #8a887f; border-top: 2px solid #1c1c1a;
+  padding-top: 9px; margin: 0 0 2px;
+}
+.doc .companion-title { margin: 6px 0 12px; font-size: 21px; }
+.doc h3.cpn { font-size: 12px; text-transform: uppercase; letter-spacing: .08em;
+  color: #6d6b64; margin: 20px 0 8px; font-family: Inter, system-ui, sans-serif; }
+.doc ul.check { list-style: none; padding-left: 2px; }
+.doc ul.check li { margin: 0 0 9px; padding-left: 27px; position: relative; }
+.doc ul.check li::before {
+  content: ""; position: absolute; left: 2px; top: 4px;
+  width: 12px; height: 12px; border: 1.5px solid #97958c; border-radius: 2.5px;
+}
+
+/*EXTRA*/
+
+/* hidden measuring pen — same metrics as a sheet's content box */
+#source {
+  position: absolute; visibility: hidden; left: -9999px; top: 0;
+  width: 666px;
+}
+
+@media print {
+  .chrome { display: none; }
+  body { background: #fff; }
+  .deck { padding: 0; gap: 0; display: block; overflow: visible; }
+  .sheet { box-shadow: none; margin: 0; page-break-after: always; }
+  .sheet:last-child { page-break-after: auto; }
+}
+@page { size: A4; margin: 0; }
+</style>
+
+<div class="chrome">
+  <strong>Print preview — {{TITLE}}</strong>
+  <span id="count">paginating…</span>
+  <span>A4 · light mode · the PDF will match these pages exactly</span>
+</div>
+<div class="deck" id="deck"></div>
+
+<div id="source" class="doc"><!--ARTICLE--></div>
+
+<script>
+const PAGE_CONTENT_H = 1122 - 60 - 56;   // sheet minus padding
+const deck = document.getElementById('deck');
+const source = document.getElementById('source');
+
+function newSheet() {
+  const s = document.createElement('div');
+  s.className = 'sheet';
+  const c = document.createElement('div');
+  c.className = 'doc';
+  const n = document.createElement('div');
+  n.className = 'pageno';
+  s.appendChild(c); s.appendChild(n);
+  deck.appendChild(s);
+  return c;
+}
+
+function outer(el) {
+  const cs = getComputedStyle(el);
+  return {
+    h: el.getBoundingClientRect().height,
+    mt: parseFloat(cs.marginTop) || 0,
+    mb: parseFloat(cs.marginBottom) || 0
+  };
+}
+
+// a list taller than a page can't move whole — split it into page-sized
+// continuation lists (keeping <ol> numbering) before pagination runs
+function splitTallLists() {
+  const LIMIT = PAGE_CONTENT_H * 0.85;
+  Array.from(source.querySelectorAll(':scope > ul, :scope > ol')).forEach(list => {
+    if (list.getBoundingClientRect().height <= PAGE_CONTENT_H) return;
+    const items = Array.from(list.children);
+    let chunk = [], chunks = [], h = 0;
+    items.forEach(li => {
+      const lh = li.getBoundingClientRect().height;
+      if (h + lh > LIMIT && chunk.length) { chunks.push(chunk); chunk = []; h = 0; }
+      chunk.push(li); h += lh;
+    });
+    chunks.push(chunk);
+    let start = list.tagName === 'OL' ? (parseInt(list.getAttribute('start')) || 1) : 0;
+    let anchor = list;
+    chunks.forEach((c, k) => {
+      let target = list;
+      if (k > 0) {
+        target = document.createElement(list.tagName);
+        if (list.tagName === 'OL') target.setAttribute('start', start);
+        target.className = list.className;
+        anchor.after(target); anchor = target;
+      }
+      c.forEach(li => target.appendChild(li));
+      start += c.length;
+    });
+  });
+}
+
+let listsSplit = false;
+function paginate() {
+  if (!listsSplit) { splitTallLists(); listsSplit = true; }
+  deck.innerHTML = '';                       // idempotent: re-runs replace the deck
+  const blocks = Array.from(source.children);
+  const metrics = blocks.map(outer);
+  const isHeading = el => /^H[123]$/.test(el.tagName) ||
+    el.classList.contains('meta') || el.classList.contains('tags');
+
+  let page = newSheet(), used = 0, prevMb = 0, first = true;
+
+  const place = (i) => {
+    const el = blocks[i], m = metrics[i];
+    let add = first ? m.h : Math.max(prevMb, m.mt) + m.h;
+
+    // blocks are atomic, so a heading only stays if its ENTIRE next block fits
+    let need = add;
+    if (isHeading(el) && i + 1 < blocks.length) {
+      const gap = Math.max(m.mb, metrics[i + 1].mt);
+      need += Math.min(metrics[i + 1].h + gap, PAGE_CONTENT_H * 0.6);
+    }
+
+    if (!first && el.classList.contains('break-page')) {
+      page = newSheet(); used = 0; first = true; add = m.h;
+    } else if (!first && used + need > PAGE_CONTENT_H) {
+      // a rule at a page boundary is redundant — the break is the rule
+      if (el.tagName === 'HR') { prevMb = 0; return; }
+      page = newSheet(); used = 0; first = true;
+      add = m.h;
+    }
+    if (first && el.tagName === 'HR') return;  // never open a page with a rule
+    const clone = el.cloneNode(true);          // source stays intact for re-runs
+    if (first) clone.style.marginTop = '0';
+    page.appendChild(clone);
+    used += add; prevMb = m.mb; first = false;
+  };
+
+  for (let i = 0; i < blocks.length; i++) place(i);
+
+  const sheets = deck.querySelectorAll('.sheet');
+  sheets.forEach((s, i) =>
+    s.querySelector('.pageno').textContent = (i + 1) + ' / ' + sheets.length);
+  document.getElementById('count').textContent = sheets.length + ' pages';
+  document.title = '{{TITLE}} — ' + sheets.length + ' pages';
+}
+
+window.onerror = (m, s, l, c) =>
+  document.getElementById('count').textContent = 'ERR ' + m + ' @' + l + ':' + c;
+// rAF/fonts.ready alone are unreliable under headless virtual time: paginate as
+// soon as the DOM is ready, then once more when the embedded fonts settle
+function go() { try { paginate(); } catch (e) { window.onerror(e.message, '', e.line || 0, 0); } }
+if (document.readyState !== 'loading') go();
+else document.addEventListener('DOMContentLoaded', go);
+window.addEventListener('load', go);
+document.fonts.ready.then(go);
+</script>
