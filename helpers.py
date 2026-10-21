@@ -95,6 +95,11 @@ def load_image(src):
         im = Image.open(io.BytesIO(fetch(src)))
     else:
         im = Image.open(src)
+    if im.mode in ('RGBA', 'LA', 'P'):     # transparent PNG/GIF: flatten onto white, not black
+        im = im.convert('RGBA')
+        bg = Image.new('RGB', im.size, 'white')
+        bg.paste(im, mask=im.split()[3])
+        return bg
     return im.convert('RGB')
 
 
@@ -182,12 +187,13 @@ def odd_glyphs(body):
     return sorted(set(c for c in text if ord(c) > 0x24F and not 0x2000 <= ord(c) <= 0x206F))
 
 
-def companion(tldr, ideas, actions):
+def companion(tldr, ideas, actions, by='Claude'):
     """One-page 'Reader's companion' appended after the article: TL;DR, key
-    ideas, and checkbox action points. Clearly labeled as Claude's addition."""
+    ideas, and checkbox action points. Clearly labeled as an AI addition
+    (`by` names who wrote it)."""
     return (
         '<p class="crumb break-page">Reader’s companion · summary &amp; action points · '
-        'added by Claude — not part of the original article</p>'
+        f'added by {_html.escape(by)} — not part of the original article</p>'
         '<h2 class="companion-title">Summary &amp; action points</h2>'
         f'<p>{tldr}</p>'
         '<h3 class="cpn">Key ideas</h3><ul>' +
@@ -208,6 +214,39 @@ def build(out_path, title, meta, chips, body, fonts_css, extra_css=''):
               .replace('<!--ARTICLE-->', head + body))
     Path(out_path).write_text(doc, encoding='utf-8')
     print(f'{out_path}: {len(doc)/1e6:.1f} MB')
+
+
+def site_font(page, base_url=''):
+    """Guess whether a site's body text is serif or sans from its inline and
+    linked CSS. Returns 'serif' or 'sans' (pick Gelasio or Inter from that)."""
+    css = ' '.join(re.findall(r'<style[^>]*>(.*?)</style>', page, re.S))
+    for href in re.findall(r'<link[^>]+rel="?stylesheet"?[^>]*href="([^"]+)"', page)[:4]:
+        if href.startswith('//'):
+            href = 'https:' + href
+        elif not re.match(r'https?://', href):
+            href = re.sub(r'(https?://[^/]+).*', r'\1', base_url) + '/' + href.lstrip('/')
+        if 'fonts.googleapis' in href or 'fontawesome' in href:
+            continue
+        css += fetch(href).decode('utf-8', 'replace')
+    fams = re.findall(r'(?:body|html|article|\.post|\.content|\.entry)[^{]*\{[^}]*?font-family:\s*([^;}]+)', css)
+    fams = fams or re.findall(r'font-family:\s*([^;}]+)', css)
+    serif = sum(1 for f in fams if re.search(r'\bserif\b', f) and 'sans-serif' not in f)
+    return 'serif' if fams and serif * 2 > len(fams) else 'sans'
+
+
+def dom_check(html_path):
+    """Run the paginator headless and report {'sheets', 'error', 'companion_fits'}.
+    companion_fits is False when the companion page spilled onto a second sheet."""
+    dom = subprocess.run([chrome_bin(), '--headless=new', '--disable-gpu', '--virtual-time-budget=30000',
+                          '--dump-dom', f'file://{Path(html_path).resolve()}'],
+                         capture_output=True, text=True).stdout
+    parts = dom.split('class="sheet"')[1:]
+    err = re.search(r'id="count">(ERR[^<]*)<', dom)
+    fits = True
+    for k, part in enumerate(parts):
+        if 'companion-title' in part:
+            fits = k == len(parts) - 1
+    return {'sheets': len(parts), 'error': err.group(1) if err else None, 'companion_fits': fits}
 
 
 def chrome_bin():
