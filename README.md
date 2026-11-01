@@ -43,6 +43,10 @@ or just paste a URL and ask for a printable PDF. Claude fetches the page, rebuil
 - Per-site CSS goes through the `/*EXTRA*/` placeholder (fonts, heading sizes, title alignment).
 - Base typography lives in the `.doc` rules of `print_template.html`.
 
+## Hosted version
+
+Want it without a Claude Code session, e.g. from your phone's share sheet? [blog-pdf-service](https://github.com/b11nmayavi-coder/blog-pdf-service) is a small self-hosted web app that reuses this skill's template and helpers, writes the companion page with the Claude API, and saves PDFs to Google Drive.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
