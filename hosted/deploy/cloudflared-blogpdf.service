@@ -1,0 +1,11 @@
+[Unit]
+Description=Cloudflare Tunnel -> blog-pdf :8099
+After=network-online.target
+
+[Service]
+ExecStart=%h/.local/bin/cloudflared --no-autoupdate tunnel --config %h/.cloudflared/blogpdf.yml run
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target

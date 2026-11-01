@@ -1,6 +1,6 @@
 ---
 name: blog-to-pdf
-description: Turn a blog post / article URL into a print-ready A4 PDF — light mode, careful pagination (nothing cut mid-block), per-site typography, images placed side-by-side with text where it saves pages, and a closing "Summary & action points" page. Use when the user gives an article URL and wants a PDF / printable version of it. Delivers the PDF (plus an interactive preview artifact when the Artifact tool is available).
+description: Turn a blog post / article URL into a print-ready A4 PDF — light mode, careful pagination (nothing cut mid-block), per-site typography, images placed side-by-side with text where it saves pages, and a closing "Summary & action points" page. Use when the user gives an article URL and wants a PDF / printable version of it. Delivers the PDF (plus an interactive preview artifact when the Artifact tool is available). Also use when the user wants to host/self-host this as a web app, use it from their phone or iPhone share sheet, or set up unattended blog-to-PDF conversion (hosted mode, see hosted/SETUP.md).
 ---
 
 # blog-to-pdf
@@ -15,6 +15,10 @@ Convert an article URL into a paginated, print-ready A4 PDF. These are read on p
 - `helpers.py` — stdlib + Pillow only (no bs4/lxml needed):
   `fetch(url)`, `container(html, marker)`, `blocks(inner)`, `google_fonts(spec)`, `image_tag(src, caption)`, `img_uri(src, photo=)`, `is_dark(im)`, `sidebyside(body)`, `odd_glyphs(body)`, `companion(tldr, ideas, actions)`, `build(...)`, `render_pdf(html, pdf)`, `page_grid(pdf, png)`.
 - `examples/build_example.py` — a complete build script for a Substack post; copy and adapt it for other sites.
+
+## Hosted mode (no Claude Code in the loop)
+
+`hosted/` is a self-hosted web app built on this same template and these helpers. It has a URL form, a job queue with progress and ETA, Recent and Calendar views, a Redo button, `POST /jobs` for iPhone Shortcuts, Claude API summaries and an rclone Drive upload. When the user asks to host, self-host, serve, run unattended, or share from their phone, **read `hosted/SETUP.md` and follow it step by step**; don't improvise the setup. Converting a single article in this session still uses the workflow below.
 
 ## Requirements
 

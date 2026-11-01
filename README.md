@@ -2,7 +2,7 @@
 
 Turn any blog post or article URL into a **print-ready A4 PDF**: light mode, careful pagination (nothing ever cut mid-paragraph or mid-image), typography that matches the site, images laid out beside the text where that saves pages, and a one-page **reader's companion** (TL;DR, key ideas, checkbox action points) at the end — clearly labeled as added by Claude.
 
-It is a [Claude Code skill](https://docs.claude.com/en/docs/claude-code/skills): a `SKILL.md` playbook plus a self-paginating HTML template and a small Python helper module. Claude does the extraction and summarising; the template and helpers do the layout.
+It is a [Claude Code skill](https://docs.claude.com/en/docs/claude-code/skills): a `SKILL.md` playbook plus a self-paginating HTML template and a small Python helper module. Claude does the extraction and summarising; the template and helpers do the layout. It also includes an optional [hosted mode](#hosted-mode-from-your-phone-no-claude-code-session) web app that you can use from your phone.
 
 ## Install
 
@@ -43,9 +43,23 @@ or just paste a URL and ask for a printable PDF. Claude fetches the page, rebuil
 - Per-site CSS goes through the `/*EXTRA*/` placeholder (fonts, heading sizes, title alignment).
 - Base typography lives in the `.doc` rules of `print_template.html`.
 
-## Hosted version
+## Hosted mode: from your phone, no Claude Code session
 
-Want it without a Claude Code session, e.g. from your phone's share sheet? [blog-pdf-service](https://github.com/b11nmayavi-coder/blog-pdf-service) is a small self-hosted web app that reuses this skill's template and helpers, writes the companion page with the Claude API, and saves PDFs to Google Drive.
+The `hosted/` folder is a small self-hosted web app built on the same template and helpers. Paste a URL, or share it from the iPhone share sheet, and the PDF lands in Google Drive. The reader's companion is written by the Claude API.
+
+- A queue with live progress and ETA, Recent (grouped by day) and Calendar views, and a Redo button
+- Known-site containers plus a [trafilatura](https://trafilatura.readthedocs.io/) fallback for extraction, a font heuristic, and automatic page checks
+- Runs on Linux (systemd) or macOS (launchd); optionally reachable from anywhere behind Cloudflare Tunnel + Access
+
+Setting it up is part of the skill. In Claude Code, say:
+
+```
+set up blog-to-pdf hosted mode
+```
+
+Claude follows [`hosted/SETUP.md`](hosted/SETUP.md). It checks prerequisites, creates the venv in `~/.local/share/blog-pdf`, has you add an Anthropic API key from your own terminal (never pasted into the chat), connects Drive, starts the background service and, if you want, adds the private public URL and the iPhone Shortcut. You can also follow that file by hand.
+
+Hosted mode has no human review step, so unusual layouts can extract imperfectly. When that happens, run `/blog-to-pdf <url>` in Claude Code for that article.
 
 ## License
 

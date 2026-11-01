@@ -1,0 +1,14 @@
+[Unit]
+Description=blog-pdf: article URL -> print-ready A4 PDF (:8099)
+After=network-online.target
+
+[Service]
+WorkingDirectory=%h/.claude/skills/blog-to-pdf/hosted
+EnvironmentFile=%h/.local/share/blog-pdf/.env
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=%h/.local/share/blog-pdf/venv/bin/python -u server.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target

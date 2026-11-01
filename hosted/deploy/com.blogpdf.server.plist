@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- macOS: copy to ~/Library/LaunchAgents/, replace HOME_DIR, then
+     launchctl load -w ~/Library/LaunchAgents/com.blogpdf.server.plist -->
+<plist version="1.0"><dict>
+  <key>Label</key><string>com.blogpdf.server</string>
+  <key>WorkingDirectory</key><string>HOME_DIR/.claude/skills/blog-to-pdf/hosted</string>
+  <key>ProgramArguments</key><array>
+    <string>/bin/sh</string><string>-c</string>
+    <string>set -a; . HOME_DIR/.local/share/blog-pdf/.env; set +a; exec HOME_DIR/.local/share/blog-pdf/venv/bin/python -u server.py</string>
+  </array>
+  <key>EnvironmentVariables</key><dict>
+    <key>PATH</key><string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+  </dict>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+  <key>StandardOutPath</key><string>HOME_DIR/.local/share/blog-pdf/server.log</string>
+  <key>StandardErrorPath</key><string>HOME_DIR/.local/share/blog-pdf/server.log</string>
+</dict></plist>

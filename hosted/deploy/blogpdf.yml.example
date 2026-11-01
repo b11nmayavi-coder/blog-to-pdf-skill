@@ -1,0 +1,6 @@
+tunnel: <TUNNEL-UUID>
+credentials-file: /home/<you>/.cloudflared/<TUNNEL-UUID>.json
+ingress:
+  - hostname: blogpdf.example.com
+    service: http://127.0.0.1:8099
+  - service: http_status:404

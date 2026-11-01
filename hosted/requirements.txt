@@ -1,0 +1,5 @@
+anthropic>=1.17
+lxml>=6
+lxml_html_clean
+pillow
+trafilatura>=2.3
